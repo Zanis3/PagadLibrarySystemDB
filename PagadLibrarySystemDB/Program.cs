@@ -33,6 +33,7 @@ namespace PagadLibrarySystemDB
             {
                 Console.WriteLine("Something went wrong. Please try again...");
                 Console.WriteLine(ex);
+                System.Threading.Thread.Sleep(5000);
             }
         }
 
@@ -142,7 +143,7 @@ namespace PagadLibrarySystemDB
                 int borrowCodeGeneration = rand.Next(1000, 9999);
                 connection.Open();
 
-                SqlCommand borrowBook = new SqlCommand($"UPDATE BookTbl SET BookIsAvailable = 0, BookBorrowCode = 'borrowCodeGeneration' WHERE BookName = '{bookName}'", connection);
+                SqlCommand borrowBook = new SqlCommand($"UPDATE BookTbl SET BookIsAvailable = 0, BookBorrowCode = {borrowCodeGeneration} WHERE BookName = '{bookName}'", connection);
 
                 borrowBook.ExecuteNonQuery();
 
@@ -493,10 +494,9 @@ namespace PagadLibrarySystemDB
                             Console.Clear();
                         }
                     }
-                    catch (Exception ex)
+                    catch (Exception)
                     {
                         Console.WriteLine("Invalid input. Please try again.");
-                        Console.WriteLine(ex);
                         System.Threading.Thread.Sleep(1500);
                         Console.Clear();
                     }
@@ -635,12 +635,15 @@ namespace PagadLibrarySystemDB
                                         Console.WriteLine("WILL AUTOMATICALLY GO BACK TO THE MAIN MENU IN 15 SECONDS. PLEASE TAKE NOTE OF YOUR BORROW CODE.");
                                         menuOptions[3] = false;
                                         mainMenuRun = true;
+                                        System.Threading.Thread.Sleep(15000);
                                         Console.Clear();
+                                        connection.Close();
                                         break;
                                     }
                                     else if(borrowConfirm == 2)
                                     {
                                         Console.Clear();
+                                        connection.Close();
                                         break;
                                     }
                                     else if (borrowConfirm == 3)
@@ -648,6 +651,7 @@ namespace PagadLibrarySystemDB
                                         Console.Clear();
                                         menuOptions[3] = false;
                                         mainMenuRun = true;
+                                        connection.Close();
                                         break;
                                     }
                                     else
@@ -657,12 +661,18 @@ namespace PagadLibrarySystemDB
                                         Console.Clear();
                                     }
                                 }
-                                catch(Exception)
+                                catch(Exception ex)
                                 {
                                     Console.WriteLine("Invalid input. Please try again.");
+                                    Console.WriteLine(ex);
                                     System.Threading.Thread.Sleep(1500);
                                     Console.Clear();
                                 }
+                            }
+                            else
+                            {
+                                System.Threading.Thread.Sleep(2000);
+                                Console.Clear();
                             }
                         }
                         else
@@ -671,8 +681,6 @@ namespace PagadLibrarySystemDB
                             System.Threading.Thread.Sleep(1500);
                             Console.Clear();
                         }
-
-                        connection.Close();
                     }
                     catch (Exception ex)
                     {
@@ -680,6 +688,10 @@ namespace PagadLibrarySystemDB
                         Console.WriteLine(ex);
                         System.Threading.Thread.Sleep(1500);
                         Console.Clear();
+                    }
+                    finally
+                    {
+                        connection.Close();
                     }
                 }
 
