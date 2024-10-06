@@ -159,6 +159,85 @@ namespace PagadLibrarySystemDB
                 connection.Close();
             }
         }
+
+        internal void returnBook(int code)
+        {
+            try
+            {
+                connection.Open();
+
+                SqlCommand borrowBook = new SqlCommand($"UPDATE BookTbl SET BookIsAvailable = 1, BookBorrowCode = NULL WHERE BookBorrowCode = {code}", connection);
+
+                int rowsAffected = borrowBook.ExecuteNonQuery();
+
+                if(rowsAffected > 0)
+                {
+                    Console.WriteLine($"Successfully returned book! Thank you for returning the book.");
+                }
+                else
+                {
+                    Console.WriteLine("Book Borrow Code Not Found. Please Try Again.");
+                }
+
+                
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Something went wrong. Please try again...");
+                Console.WriteLine(ex);
+            }
+            finally
+            {
+                connection.Close();
+            }
+        }
+
+        internal void viewAllBooks()
+        {
+            try
+            {
+                connection.Open();
+                SqlCommand viewBooks = new SqlCommand("SELECT * FROM BookTbl", connection);
+                SqlDataReader reader = viewBooks.ExecuteReader();
+
+                if (reader.HasRows)
+                {
+                    while (reader.Read())
+                    {
+                        //RETRIEVES VALUES FROM TABLE
+                        string bookId = reader["BookID"].ToString();
+                        string bookName = reader["BookName"].ToString();
+                        string bookAuthor = reader["BookAuthor"].ToString();
+                        string bookISBN = reader["BookISBN"].ToString();
+                        bool bookAvailable = (bool)reader["BookIsAvailable"];
+                        string available;
+
+                        //CONVERTS BOOL TO STRING
+                        if (bookAvailable)
+                        {
+                            available = "AVAILABLE";
+                        }
+                        else
+                        {
+                            available = "NOT AVAILABLE";
+                        }
+
+                        //DISPLAY RESULTS
+
+                        Console.WriteLine($"#{bookId} - {bookName} by {bookAuthor} ({bookISBN}). STATUS: {available}");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Something went wrong. Please try again...");
+                Console.WriteLine(ex);
+            }
+            finally
+            {
+                connection.Close();
+            }
+        }
     }
     internal class Program
     {
@@ -698,13 +777,49 @@ namespace PagadLibrarySystemDB
                 //RETURNING BOOK INTERFACE
                 while (menuOptions[4])
                 {
+                    int borrowCode = 10000;
+                    Console.WriteLine("        RETURN BOOK          ");
+                    Console.WriteLine("_____________________________");
+                    Console.Write("ENTER THE BOOK BORROW CODE: ");
+                    try
+                    {
+                        borrowCode = Convert.ToInt16(Console.ReadLine());
 
+                        if(borrowCode < 1000 || borrowCode > 9999)
+                        {
+                            Console.WriteLine("Invalid input. Please try again.");
+                            System.Threading.Thread.Sleep(1500);
+                            Console.Clear();
+                        }
+                        else
+                        {
+                            library.returnBook(borrowCode);
+                            Console.WriteLine();
+                            Console.WriteLine("GOING BACK TO THE MAIN MENU IN FIVE SECONDS...");
+                            menuOptions[4] = false;
+                            mainMenuRun = true;
+                            System.Threading.Thread.Sleep(5000);
+                            Console.Clear();
+                            break;
+                        }
+                    }
+                    catch(Exception)
+                    {
+                        Console.WriteLine("Invalid input. Please try again.");
+                        System.Threading.Thread.Sleep(1500);
+                        Console.Clear();
+                    }
                 }
 
                 //VIEW ALL BOOK INTERFACE
                 while (menuOptions[5])
                 {
-
+                    library.viewAllBooks();
+                    Console.WriteLine("PRESS ANY KEY TO GO BACK...");
+                    Console.ReadKey();
+                    menuOptions[5] = false;
+                    mainMenuRun = true;
+                    Console.Clear();
                 }
             }
 
